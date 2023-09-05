@@ -4,51 +4,66 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import Capstone.easyreservation.entity.Utente;
+import Capstone.easyreservation.enums.UserRole;
 import Capstone.easyreservation.exception.BadRequestException;
+import Capstone.easyreservation.exception.NotFoundException;
 import Capstone.easyreservation.payloads.NuovoUtentePayload;
 import Capstone.easyreservation.repository.UtenteRepository;
+
 
 @Service
 public class UtenteService {
 
 	@Autowired
-	UtenteRepository utenteRepository;
+	UtenteRepository ur;
 
-	public Utente save(NuovoUtentePayload body) {
-		utenteRepository.findByEmail(body.getEmail()).ifPresent(utente -> {
-			throw new BadRequestException("L'email " + body.getEmail() + " è gia stata utilizzata");
+	// --------------------------------------------------------user save
+	public Utente saveUser(NuovoUtentePayload body) {
+
+		ur.findByEmail(body.getEmail()).ifPresent(User -> {
+			throw new BadRequestException("Email " + body.getEmail() + " è già stata utilizzata");
 		});
-		Utente newUtente = new Utente(body.getUsername(), body.getNome(), body.getCognome(), body.getEmail(),
-				body.getPassword(), body.getRuolo());
-		return utenteRepository.save(newUtente);
+
+		Utente newUser = Utente.builder().name(body.getName()).surname(body.getSurname()).email(body.getEmail())
+				.password(body.getPassword()).role(UserRole.USER).build();
+
+		return ur.save(newUser);
+
 	}
 
+	// --------------------------------------------------------get all users
 	public List<Utente> getUsers() {
-		return utenteRepository.findAll();
+		return ur.findAll();
 	}
 
-	public Utente findById(UUID id) throws ChangeSetPersister.NotFoundException {
-		return utenteRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+	// --------------------------------------------------------get user by id
+	public Utente findById(UUID idUser) {
+		return ur.findById(idUser).orElseThrow(() -> new NotFoundException(idUser));
 	}
 
-	public Utente findByIdAndUpdate(UUID id, NuovoUtentePayload body) throws ChangeSetPersister.NotFoundException {
+	// --------------------------------------------------------get user by email
+	public Utente findByEmail(String email) {
+		return ur.findByEmail(email).orElseThrow(() -> new NotFoundException(email));
+	}
+
+	// --------------------------------------------------------modify user by id
+	public Utente findByIdAndUpdate(UUID id, NuovoUtentePayload body) throws NotFoundException {
+
+		Utente foundUser = this.findById(id);
+
+		foundUser.setName(body.getName());
+		foundUser.setSurname(body.getSurname());
+		foundUser.setEmail(body.getEmail());
+
+		return ur.save(foundUser);
+	}
+
+	// --------------------------------------------------------delete user by id
+	public void findByIdAndDelete(UUID id) throws NotFoundException {
 		Utente found = this.findById(id);
-		found.setNome(body.getNome());
-		found.setCognome(body.getCognome());
-		found.setEmail(body.getEmail());
-		return utenteRepository.save(found);
-	}
-
-	public void findByIdAndDelete(UUID id) throws ChangeSetPersister.NotFoundException {
-		Utente found = this.findById(id);
-		utenteRepository.delete(found);
-	}
-
-	public Utente findByEmail(String email) throws ChangeSetPersister.NotFoundException {
-		return utenteRepository.findByEmail(email).orElseThrow(ChangeSetPersister.NotFoundException::new);
+		ur.delete(found);
 	}
 }

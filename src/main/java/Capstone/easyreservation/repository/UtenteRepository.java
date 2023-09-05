@@ -11,5 +11,7 @@ import Capstone.easyreservation.entity.Utente;
 @Repository
 public interface UtenteRepository extends JpaRepository<Utente, UUID> {
 
+	Optional<Utente> findById(UUID idUser);
 	Optional<Utente> findByEmail(String email);
+
 }

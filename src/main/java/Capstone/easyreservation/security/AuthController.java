@@ -1,10 +1,7 @@
 package Capstone.easyreservation.security;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,39 +20,29 @@ import Capstone.easyreservation.services.UtenteService;
 public class AuthController {
 
 	@Autowired
-	UtenteService utenteService;
+	UtenteService us;
 
 	@Autowired
 	JWTTools jwtTools;
 
-	@Autowired
-	PasswordEncoder bcrypt;
-
 	@PostMapping("/register")
 	@ResponseStatus(HttpStatus.CREATED)
-	public Utente saveUtente(@RequestBody NuovoUtentePayload body) {
-
-		body.setPassword(bcrypt.encode(body.getPassword()));
-		Utente created = utenteService.save(body);
-		return created;
+	public Utente saveUser(@RequestBody NuovoUtentePayload body) {
+		return us.saveUser(body);
 	}
 
 	@PostMapping("/login")
 	public LoginSuccessfullPayload login(@RequestBody UtenteLoginPayload body) {
-		try {
-			Utente utente = utenteService.findByEmail(body.getEmail());
 
-			if (bcrypt.matches(body.getPassword(), utente.getPassword())) {
-				String token = jwtTools.createToken(utente);
-				return new LoginSuccessfullPayload(token);
-			} else {
-				throw new UnauthorizedException("Credenziali non valide");
-			}
-		} catch (ChangeSetPersister.NotFoundException e) {
-			throw new UnauthorizedException("Utente non trovato con email: " + body.getEmail());
+		Utente user = us.findByEmail(body.getEmail());
+
+		if (body.getPassword().equals(user.getPassword())) {
+			String token = jwtTools.createToken(user);
+			return new LoginSuccessfullPayload(token);
+		} else {
+			throw new UnauthorizedException("Credenziali non valide!");
 		}
 	}
-
 
 	@PostMapping("/logout")
 	public ResponseEntity<String> logout() {
@@ -63,4 +50,5 @@ public class AuthController {
 		return ResponseEntity.ok("Logout effettuato con successo");
 
 	}
+
 }
