@@ -31,9 +31,10 @@ public class SecurityConfig {
 		http.addFilterBefore(corsFilter, JWTAuthFilter.class);
 
 		http.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll());
-		http.authorizeHttpRequests(auth -> auth.requestMatchers("/books/**").authenticated());
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/hotel/**").authenticated());
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/stanze/**").authenticated());
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/prenotazioni/**").authenticated());
 		http.authorizeHttpRequests(auth -> auth.requestMatchers("/users/**").authenticated());
-
 
 		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
