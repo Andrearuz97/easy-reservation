@@ -24,5 +24,39 @@ public class Reservation {
 	@ManyToOne
 	@JoinColumn(name = "stanza_id")
 	private Room stanza;
+	
+
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Room getStanza() {
+		return stanza;
+	}
+
+	public void setStanza(Room stanza) {
+		this.stanza = stanza;
+	}
+
+	public Date getDataCheckIn() {
+		return dataCheckIn;
+	}
+
+	public void setDataCheckIn(Date dataCheckIn) {
+		this.dataCheckIn = dataCheckIn;
+	}
+
+	public Date getDataCheckOut() {
+		return dataCheckOut;
+	}
+
+	public void setDataCheckOut(Date dataCheckOut) {
+		this.dataCheckOut = dataCheckOut;
+	}
 
 }

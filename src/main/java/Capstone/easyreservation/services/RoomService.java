@@ -31,10 +31,6 @@ public class RoomService {
 		return stanzaRepository.save(room);
 	}
 
-
-
-
-
 	// Elimina una stanza
 	public void deleteRoom(Long id) {
 		stanzaRepository.deleteById(id);
