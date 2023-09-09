@@ -3,6 +3,7 @@ package Capstone.easyreservation.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import Capstone.easyreservation.payloads.HotelPayload;
@@ -32,6 +34,11 @@ public class HotelController {
 		return hotelService.getHotelById(id);
 	}
 
+	@GetMapping("/search")
+	public ResponseEntity<List<HotelPayload>> searchHotels(@RequestParam String nome) {
+		List<HotelPayload> results = hotelService.searchHotelsByNome(nome);
+		return ResponseEntity.ok(results);
+	}
 	@PostMapping
 	public HotelPayload createHotel(@RequestBody HotelPayload hotelPayload) {
 		return hotelService.saveHotel(hotelPayload);

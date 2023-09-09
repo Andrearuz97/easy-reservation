@@ -25,6 +25,11 @@ public class HotelService {
 		return convertToPayload(hotel);
 	}
 
+	public List<HotelPayload> searchHotelsByNome(String nome) {
+		List<Hotel> hotels = hotelRepository.findByNomeContainingIgnoreCase(nome);
+		return hotels.stream().map(this::convertToPayload).collect(Collectors.toList());
+	}
+
 	public HotelPayload saveHotel(HotelPayload hotelPayload) {
 		Hotel hotel = convertToEntity(hotelPayload);
 		hotel = hotelRepository.save(hotel);
