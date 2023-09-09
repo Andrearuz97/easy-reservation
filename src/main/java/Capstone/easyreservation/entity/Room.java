@@ -24,12 +24,7 @@ public class Room {
 	@JoinColumn(name = "hotel_id")
 	private Hotel hotel;
 
-	public Long getHotelId() {
-		if (hotel != null) {
-			return hotel.getId();
-		}
-		return null;
-	}
+
 
 	public Hotel getHotel() {
 		return hotel;

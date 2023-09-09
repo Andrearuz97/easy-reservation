@@ -24,8 +24,15 @@ public class Reservation {
 	@ManyToOne
 	@JoinColumn(name = "stanza_id")
 	private Room stanza;
-	
 
+	
+	public Utente getUtente() {
+		return utente;
+	}
+
+	public void setUtente(Utente utente) {
+		this.utente = utente;
+	}
 
 	public Long getId() {
 		return id;

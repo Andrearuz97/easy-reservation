@@ -2,6 +2,7 @@ package Capstone.easyreservation.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,35 +26,41 @@ public class UtenteController {
 	@Autowired
 	private UtenteService us;
 
-	// --------------------------------------------------------get all users
 	@GetMapping("")
-	public List<Utente> getUser() {
-		return us.getUsers();
+	public List<NuovoUtentePayload> getUsers() {
+		List<Utente> users = us.getUsers();
+		return convertToPayloadList(users);
 	}
 
-	// --------------------------------------------------------find user by id
 	@GetMapping("/{idUser}")
-	public Utente findById(@PathVariable UUID idUser) {
-		return us.findById(idUser);
+	public NuovoUtentePayload findById(@PathVariable UUID idUser) {
+		Utente user = us.findById(idUser);
+		return convertToPayload(user);
 	}
 
-	// --------------------------------------------------------find user by email
-	@GetMapping("/{email}")
-	public Utente findById(@PathVariable String email) {
-		return us.findByEmail(email);
+	@GetMapping("/by-email/{email}")
+	public NuovoUtentePayload findByEmail(@PathVariable String email) {
+		Utente user = us.findByEmail(email);
+		return convertToPayload(user);
 	}
 
-	// --------------------------------------------------------update user
 	@PutMapping("/{idUser}")
-	public Utente updateUser(@PathVariable UUID idUser, @RequestBody NuovoUtentePayload body) {
-		return us.findByIdAndUpdate(idUser, body);
+	public NuovoUtentePayload updateUser(@PathVariable UUID idUser, @RequestBody NuovoUtentePayload body) {
+		Utente updatedUser = us.findByIdAndUpdate(idUser, body);
+		return convertToPayload(updatedUser);
 	}
 
-	// --------------------------------------------------------delete user
 	@DeleteMapping("/{idUser}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@PathVariable UUID idUser) {
 		us.findByIdAndDelete(idUser);
 	}
 
+	private NuovoUtentePayload convertToPayload(Utente user) {
+		return new NuovoUtentePayload(user.getName(), user.getSurname(), user.getEmail(), user.getPassword());
+	}
+
+	private List<NuovoUtentePayload> convertToPayloadList(List<Utente> users) {
+		return users.stream().map(this::convertToPayload).collect(Collectors.toList());
+	}
 }

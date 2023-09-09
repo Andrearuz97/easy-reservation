@@ -1,7 +1,6 @@
 package Capstone.easyreservation.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import Capstone.easyreservation.entity.Hotel;
+import Capstone.easyreservation.payloads.HotelPayload;
 import Capstone.easyreservation.services.HotelService;
 
 @RestController
@@ -24,26 +23,24 @@ public class HotelController {
 	private HotelService hotelService;
 
 	@GetMapping
-	public List<Hotel> getAllHotels() {
+	public List<HotelPayload> getAllHotels() {
 		return hotelService.getAllHotels();
 	}
 
 	@GetMapping("/{id}")
-	public Optional<Hotel> getHotelById(@PathVariable Long id) {
+	public HotelPayload getHotelById(@PathVariable Long id) {
 		return hotelService.getHotelById(id);
 	}
 
 	@PostMapping
-	public Hotel createHotel(@RequestBody Hotel hotel) {
-		System.out.println(hotel);
-		return hotelService.saveHotel(hotel);
+	public HotelPayload createHotel(@RequestBody HotelPayload hotelPayload) {
+		return hotelService.saveHotel(hotelPayload);
 	}
 
 	@PutMapping("/{id}")
-	public Hotel updateHotel(@PathVariable Long id, @RequestBody Hotel hotel) {
-
-		hotel.setId(id);
-		return hotelService.saveHotel(hotel);
+	public HotelPayload updateHotel(@PathVariable Long id, @RequestBody HotelPayload hotelPayload) {
+		hotelPayload.setId(id);
+		return hotelService.saveHotel(hotelPayload);
 	}
 
 	@DeleteMapping("/{id}")
