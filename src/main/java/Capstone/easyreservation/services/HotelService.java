@@ -47,6 +47,7 @@ public class HotelService {
 		payload.setNome(hotel.getNome());
 		payload.setIndirizzo(hotel.getIndirizzo());
 		payload.setDescrizione(hotel.getDescrizione());
+		payload.setStelle(hotel.getStelle()); // Aggiungi questo
 		return payload;
 	}
 
@@ -56,6 +57,7 @@ public class HotelService {
 		hotel.setNome(payload.getNome());
 		hotel.setIndirizzo(payload.getIndirizzo());
 		hotel.setDescrizione(payload.getDescrizione());
+		hotel.setStelle(payload.getStelle()); // Aggiungi questo
 		return hotel;
 	}
 }

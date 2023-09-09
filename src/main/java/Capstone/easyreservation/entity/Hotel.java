@@ -17,4 +17,5 @@ public class Hotel {
 	private String nome;
 	private String indirizzo;
 	private String descrizione;
+	private Integer stelle;
 }
