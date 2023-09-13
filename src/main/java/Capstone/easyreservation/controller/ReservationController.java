@@ -2,6 +2,7 @@ package Capstone.easyreservation.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,12 @@ public class ReservationController {
 		return reservation.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
 				.orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
 	}
+
+	@GetMapping("/user/{userId}")
+	public List<Reservation> getReservationsByUserId(@PathVariable UUID userId) {
+		return prenotazioneService.getReservationsByUserId(userId);
+	}
+
 
 
 	@PutMapping("/{id}")

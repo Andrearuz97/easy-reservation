@@ -3,6 +3,7 @@ package Capstone.easyreservation.services;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,11 @@ public class ReservationService {
 	public List<Reservation> getAllReservations() {
 		return prenotazioneRepository.findAll();
 	}
+
+	public List<Reservation> getReservationsByUserId(UUID userId) {
+		return prenotazioneRepository.findByUtenteIdUser(userId);
+	}
+
 
 	// Metodo per ottenere una prenotazione specifica tramite ID.
 	public Optional<Reservation> getReservationById(Long id) {
