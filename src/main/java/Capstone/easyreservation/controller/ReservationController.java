@@ -61,32 +61,54 @@ public class ReservationController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Reservation> updateReservation(@PathVariable Long id,
 			@RequestBody ReservationPayload reservationPayload) {
+
+		// Controlla l'ID nella richiesta PUT
+		if (id == null) {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
 		Optional<Reservation> existingReservation = prenotazioneService.getReservationById(id);
-		if (existingReservation.isPresent()) {
-			Reservation reservation = existingReservation.get();
-
-			// Verifica che l'utente attualmente autenticato sia l'utente associato alla
-			// prenotazione
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			String email = auth.getName();
-			Optional<Utente> currentUser = utenteRepository.findByEmail(email);
-
-			if (currentUser.isEmpty() || !currentUser.get().equals(reservation.getUtente())) {
-				return new ResponseEntity<>(null, HttpStatus.FORBIDDEN); // or another appropriate HTTP status
-			}
-
-			reservation.setDataCheckIn(reservationPayload.getDataCheckIn());
-			reservation.setDataCheckOut(reservationPayload.getDataCheckOut());
-
-			Optional<Room> room = roomService.getRoomById(reservationPayload.getStanzaId());
-			room.ifPresent(reservation::setStanza);
-
-			Reservation updatedReservation = prenotazioneService.saveReservation(reservation);
-			return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
-		} else {
+		if (existingReservation.isEmpty()) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
+
+		Reservation reservation = existingReservation.get();
+
+		// Verifica autenticazione utente
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		Optional<Utente> currentUser = utenteRepository.findByEmail(email);
+
+		if (currentUser.isEmpty() || !currentUser.get().equals(reservation.getUtente())) {
+			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+		}
+
+		reservation.setDataCheckIn(reservationPayload.getDataCheckIn());
+		reservation.setDataCheckOut(reservationPayload.getDataCheckOut());
+
+		// Controlla l'ID della stanza nel payload
+		if (reservationPayload.getStanzaId() == null) {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
+		Optional<Room> room = roomService.getRoomById(reservationPayload.getStanzaId());
+		if (room.isEmpty()) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+
+		// Controllo disponibilità stanza
+		if (!prenotazioneService.isRoomAvailable(room.get(), reservation.getDataCheckIn(),
+				reservation.getDataCheckOut())) {
+			return new ResponseEntity<>(null, HttpStatus.CONFLICT); // Stessa risposta di conflitto se la stanza non è
+																	// disponibile
+		}
+
+		reservation.setStanza(room.get());
+
+		Reservation updatedReservation = prenotazioneService.saveReservation(reservation);
+		return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
 	}
+
 
 
 	@DeleteMapping("/{id}")

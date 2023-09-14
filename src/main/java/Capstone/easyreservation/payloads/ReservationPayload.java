@@ -1,12 +1,13 @@
 package Capstone.easyreservation.payloads;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class ReservationPayload {
 	private Date dataCheckIn;
 	private Date dataCheckOut;
-	private Long utenteId; // user ID
-	private Long stanzaId; // room ID
+	private UUID utenteId;
+	private Long stanzaId;
 
 	public Date getDataCheckIn() {
 		return dataCheckIn;
@@ -24,11 +25,11 @@ public class ReservationPayload {
 		this.dataCheckOut = dataCheckOut;
 	}
 
-	public Long getUtenteId() {
+	public UUID getUtenteId() {
 		return utenteId;
 	}
 
-	public void setUtenteId(Long utenteId) {
+	public void setUtenteId(UUID utenteId) {
 		this.utenteId = utenteId;
 	}
 
