@@ -11,4 +11,5 @@ public class HotelPayload {
 	private String indirizzo;
 	private String descrizione;
 	private Integer stelle;
+	private String imageUrl;
 }

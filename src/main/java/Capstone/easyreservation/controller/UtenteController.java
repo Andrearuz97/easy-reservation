@@ -57,10 +57,13 @@ public class UtenteController {
 	}
 
 	private NuovoUtentePayload convertToPayload(Utente user) {
-		return new NuovoUtentePayload(user.getName(), user.getSurname(), user.getEmail(), user.getPassword());
+		return new NuovoUtentePayload(user.getName(), user.getSurname(), user.getEmail(), user.getPassword(),
+				user.getRole());
 	}
+
 
 	private List<NuovoUtentePayload> convertToPayloadList(List<Utente> users) {
 		return users.stream().map(this::convertToPayload).collect(Collectors.toList());
 	}
+
 }

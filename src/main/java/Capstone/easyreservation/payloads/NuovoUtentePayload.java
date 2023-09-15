@@ -1,5 +1,6 @@
 package Capstone.easyreservation.payloads;
 
+import Capstone.easyreservation.enums.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +14,6 @@ public class NuovoUtentePayload {
 	private String surname;
 	private String email;
 	private String password;
+	private UserRole role;
 
 }
