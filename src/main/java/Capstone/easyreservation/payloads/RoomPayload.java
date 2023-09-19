@@ -3,12 +3,21 @@ package Capstone.easyreservation.payloads;
 import Capstone.easyreservation.enums.TipoStanza;
 
 public class RoomPayload {
-	private Long id; // Aggiunto per gestire l'aggiornamento
+	private Long id; 
 	private String numeroStanza;
 	private TipoStanza tipo;
 	private Double prezzo;
 	private Long hotelId;
-	private boolean isNew; // Aggiunto per distinguere tra creazione e aggiornamento
+	private boolean isNew; 
+	private String imageUrl;
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 
 	public Long getId() {
 		return id;

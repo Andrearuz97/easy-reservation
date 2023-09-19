@@ -20,12 +20,18 @@ public class JWTTools {
 
 	public String createToken(Utente u) {
 
-		String token = Jwts.builder().setSubject(u.getIdUser().toString())
+		String token = Jwts.builder().setSubject(u.getIdUser().toString()).claim("role", u.getRole().toString())
+
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
 				.signWith(Keys.hmacShaKeyFor(secret.getBytes())).compact();
 
 		return token;
+	}
+
+	public String extractUserRole(String token) {
+		return Jwts.parserBuilder().setSigningKey(Keys.hmacShaKeyFor(secret.getBytes())).build().parseClaimsJws(token)
+				.getBody().get("role", String.class);
 	}
 
 	public void verifyToken(String token) {

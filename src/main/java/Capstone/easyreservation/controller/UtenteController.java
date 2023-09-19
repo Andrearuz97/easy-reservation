@@ -57,9 +57,10 @@ public class UtenteController {
 	}
 
 	private NuovoUtentePayload convertToPayload(Utente user) {
-		return new NuovoUtentePayload(user.getName(), user.getSurname(), user.getEmail(), user.getPassword(),
-				user.getRole());
+		return new NuovoUtentePayload(user.getIdUser(), user.getName(), user.getSurname(), user.getEmail(),
+				user.getPassword(), user.getRole());
 	}
+
 
 
 	private List<NuovoUtentePayload> convertToPayloadList(List<Utente> users) {

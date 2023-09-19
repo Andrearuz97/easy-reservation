@@ -46,6 +46,10 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
 		Utente currentUser = us.findById(UUID.fromString(id));
 
+		// Estrai il ruolo dall'utente.
+		String userRole = jwttools.extractUserRole(token);
+		System.out.println("RUOLO -------> " + userRole);
+
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(currentUser, null,
 				currentUser.getAuthorities());
 

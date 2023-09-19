@@ -57,6 +57,7 @@ public class RoomController {
         room.setTipo(roomPayload.getTipo());
         room.setPrezzo(roomPayload.getPrezzo());
         room.setHotel(hotel);
+		room.setImageUrl(roomPayload.getImageUrl());
 
         return stanzaService.saveRoom(room);
     }
@@ -74,6 +75,7 @@ public class RoomController {
         existingRoom.setNumeroStanza(roomPayload.getNumeroStanza());
         existingRoom.setTipo(roomPayload.getTipo());
         existingRoom.setPrezzo(roomPayload.getPrezzo());
+		existingRoom.setImageUrl(roomPayload.getImageUrl());
 
         return stanzaService.saveRoom(existingRoom);
     }

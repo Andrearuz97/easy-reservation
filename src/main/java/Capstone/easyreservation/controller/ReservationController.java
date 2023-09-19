@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import Capstone.easyreservation.entity.Reservation;
 import Capstone.easyreservation.entity.Room;
 import Capstone.easyreservation.entity.Utente;
+import Capstone.easyreservation.enums.UserRole;
 import Capstone.easyreservation.payloads.ReservationPayload;
 import Capstone.easyreservation.repository.UtenteRepository;
 import Capstone.easyreservation.services.ReservationService;
@@ -61,8 +62,6 @@ public class ReservationController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Reservation> updateReservation(@PathVariable Long id,
 			@RequestBody ReservationPayload reservationPayload) {
-
-		// Controlla l'ID nella richiesta PUT
 		if (id == null) {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
@@ -79,14 +78,20 @@ public class ReservationController {
 		String email = auth.getName();
 		Optional<Utente> currentUser = utenteRepository.findByEmail(email);
 
-		if (currentUser.isEmpty() || !currentUser.get().equals(reservation.getUtente())) {
+		if (currentUser.isEmpty()) {
+			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+		}
+
+		Utente utente = currentUser.get();
+		// Controllo per vedere se l'utente corrente ha il ruolo di admin o se è lo
+		// stesso utente della prenotazione
+		if (!utente.equals(reservation.getUtente()) && !utente.getRole().equals(UserRole.ADMIN)) {
 			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
 		}
 
 		reservation.setDataCheckIn(reservationPayload.getDataCheckIn());
 		reservation.setDataCheckOut(reservationPayload.getDataCheckOut());
 
-		// Controlla l'ID della stanza nel payload
 		if (reservationPayload.getStanzaId() == null) {
 			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
@@ -96,15 +101,12 @@ public class ReservationController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 
-		// Controllo disponibilità stanza
 		if (!prenotazioneService.isRoomAvailable(room.get(), reservation.getDataCheckIn(),
 				reservation.getDataCheckOut())) {
-			return new ResponseEntity<>(null, HttpStatus.CONFLICT); // Stessa risposta di conflitto se la stanza non è
-																	// disponibile
+			return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 		}
 
 		reservation.setStanza(room.get());
-
 		Reservation updatedReservation = prenotazioneService.saveReservation(reservation);
 		return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
 	}
@@ -125,15 +127,22 @@ public class ReservationController {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		Optional<Utente> currentUser = utenteRepository.findByEmail(email);
-
 		if (currentUser.isEmpty()) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+		}
+
+		Utente utente;
+		if (currentUser.get().getRole().equals(UserRole.ADMIN) && reservationPayload.getUtenteId() != null) {
+			utente = utenteRepository.findById(reservationPayload.getUtenteId())
+					.orElseThrow(() -> new RuntimeException("Utente non trovato"));
+		} else {
+			utente = currentUser.get();
 		}
 
 		Reservation reservation = new Reservation();
 		reservation.setDataCheckIn(reservationPayload.getDataCheckIn());
 		reservation.setDataCheckOut(reservationPayload.getDataCheckOut());
-		reservation.setUtente(currentUser.get());
+		reservation.setUtente(utente);
 
 		Room stanza = roomService.getRoomById(reservationPayload.getStanzaId())
 				.orElseThrow(() -> new RuntimeException("Stanza non trovata"));
@@ -146,4 +155,5 @@ public class ReservationController {
 			return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 		}
 	}
+
 }

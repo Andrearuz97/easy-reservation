@@ -19,12 +19,21 @@ public class Room {
 	@Enumerated(EnumType.STRING)
 	private TipoStanza tipo;
 	private Double prezzo;
+	private String imageUrl;
+
 
 	@ManyToOne
 	@JoinColumn(name = "hotel_id")
 	private Hotel hotel;
 
 
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 
 	public Hotel getHotel() {
 		return hotel;
