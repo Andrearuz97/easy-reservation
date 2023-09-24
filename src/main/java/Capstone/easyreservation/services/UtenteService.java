@@ -24,6 +24,7 @@ public class UtenteService {
 
 
 	// --------------------------------------------------------user save
+
 	public Utente saveUser(NuovoUtentePayload body) {
 
 		ur.findByEmail(body.getEmail()).ifPresent(User -> {
@@ -31,11 +32,12 @@ public class UtenteService {
 		});
 
 		Utente newUser = Utente.builder().name(body.getName()).surname(body.getSurname()).email(body.getEmail())
-				.password(body.getPassword()).role(UserRole.USER).build();
+				.password(body.getPassword()).role(UserRole.USER).telefono(body.getTelefono())
+				.indirizzo(body.getIndirizzo()).build();
 
 		return ur.save(newUser);
-
 	}
+
 
 	// --------------------------------------------------------get all users
 	public List<Utente> getUsers() {
@@ -60,6 +62,8 @@ public class UtenteService {
 		foundUser.setName(body.getName());
 		foundUser.setSurname(body.getSurname());
 		foundUser.setEmail(body.getEmail());
+		foundUser.setTelefono(body.getTelefono());
+		foundUser.setIndirizzo(body.getIndirizzo());
 
 		return ur.save(foundUser);
 	}

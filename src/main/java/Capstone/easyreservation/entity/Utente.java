@@ -49,6 +49,12 @@ public class Utente implements UserDetails {
 	@Column(nullable = false)
 	private String password;
 
+	@Column(nullable = true)
+	private String telefono;
+
+	@Column(nullable = true)
+	private String indirizzo;
+
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
 
