@@ -1,5 +1,6 @@
 package Capstone.easyreservation.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,10 +36,27 @@ public class HotelController {
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<List<HotelPayload>> searchHotels(@RequestParam String nome) {
-		List<HotelPayload> results = hotelService.searchHotelsByNome(nome);
-		return ResponseEntity.ok(results);
+	public ResponseEntity<List<HotelPayload>> searchHotels(
+			@RequestParam(required = false) String query) {
+
+		List<HotelPayload> results;
+
+		if (query != null && !query.trim().isEmpty()) {
+			results = hotelService.searchHotels(query, query);
+		} else {
+			results = Collections.emptyList();
+		}
+
+		if (results.isEmpty()) {
+			return ResponseEntity.notFound().build();
+	    } else {
+			return ResponseEntity.ok(results);
+	    }
 	}
+
+
+
+
 	@PostMapping
 	public HotelPayload createHotel(@RequestBody HotelPayload hotelPayload) {
 		return hotelService.saveHotel(hotelPayload);

@@ -1,5 +1,6 @@
 package Capstone.easyreservation.services;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,19 @@ public class HotelService {
 		return convertToPayload(hotel);
 	}
 
-	public List<HotelPayload> searchHotelsByNome(String nome) {
-		List<Hotel> hotels = hotelRepository.findByNomeContainingIgnoreCase(nome);
+	public List<HotelPayload> searchHotels(String nome, String citta) {
+		List<Hotel> hotels;
+
+		if ((nome != null && !nome.trim().isEmpty()) || (citta != null && !citta.trim().isEmpty())) {
+
+			hotels = hotelRepository.findByNomeContainingIgnoreCaseOrCittaContainingIgnoreCase(nome, citta);
+		} else {
+			hotels = Collections.emptyList();
+		}
+
 		return hotels.stream().map(this::convertToPayload).collect(Collectors.toList());
 	}
+
 
 	public HotelPayload saveHotel(HotelPayload hotelPayload) {
 		Hotel hotel = convertToEntity(hotelPayload);

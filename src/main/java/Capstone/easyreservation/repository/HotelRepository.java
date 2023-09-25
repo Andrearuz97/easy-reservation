@@ -9,8 +9,5 @@ import Capstone.easyreservation.entity.Hotel;
 
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Long> {
-	List<Hotel> findByNomeContainingIgnoreCase(String nome);
-
-
-
+	List<Hotel> findByNomeContainingIgnoreCaseOrCittaContainingIgnoreCase(String nome, String citta);;
 }
