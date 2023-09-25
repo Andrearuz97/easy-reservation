@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import Capstone.easyreservation.entity.Hotel;
@@ -25,6 +28,13 @@ public class HotelService {
 		Hotel hotel = hotelRepository.findById(id).orElse(null);
 		return convertToPayload(hotel);
 	}
+
+	 public Page<HotelPayload> getAllHotels(int page, int size) {
+	        Pageable pageable = PageRequest.of(page, size);
+	        Page<Hotel> hotelPage = hotelRepository.findAll(pageable);
+	        
+	        return hotelPage.map(this::convertToPayload);
+	    }
 
 	public List<HotelPayload> searchHotels(String nome, String citta) {
 		List<Hotel> hotels;
