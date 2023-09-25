@@ -32,7 +32,7 @@ public class UtenteService {
 		});
 
 		Utente newUser = Utente.builder().name(body.getName()).surname(body.getSurname()).email(body.getEmail())
-				.password(body.getPassword()).role(UserRole.USER).telefono(body.getTelefono())
+				.password(body.getPassword()).role(UserRole.USER).telefono(body.getTelefono()).citta(body.getCitta())
 				.indirizzo(body.getIndirizzo()).build();
 
 		return ur.save(newUser);
@@ -63,6 +63,7 @@ public class UtenteService {
 		foundUser.setSurname(body.getSurname());
 		foundUser.setEmail(body.getEmail());
 		foundUser.setTelefono(body.getTelefono());
+		foundUser.setCitta(body.getCitta());
 		foundUser.setIndirizzo(body.getIndirizzo());
 
 		return ur.save(foundUser);

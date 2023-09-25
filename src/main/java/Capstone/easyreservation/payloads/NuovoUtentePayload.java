@@ -17,6 +17,7 @@ public class NuovoUtentePayload {
 	private String email;
 	private String password;
 	private String telefono;
+	private String citta;
 	private String indirizzo;
 	private UserRole role;
 

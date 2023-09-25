@@ -8,6 +8,7 @@ import lombok.Setter;
 public class HotelPayload {
 	private Long id;
 	private String nome;
+	private String citta;
 	private String indirizzo;
 	private String descrizione;
 	private Integer stelle;

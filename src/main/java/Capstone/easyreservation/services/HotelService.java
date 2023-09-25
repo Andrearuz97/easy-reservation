@@ -45,6 +45,7 @@ public class HotelService {
 		HotelPayload payload = new HotelPayload();
 		payload.setId(hotel.getId());
 		payload.setNome(hotel.getNome());
+		payload.setCitta(hotel.getCitta());
 		payload.setIndirizzo(hotel.getIndirizzo());
 		payload.setDescrizione(hotel.getDescrizione());
 		payload.setStelle(hotel.getStelle());
@@ -56,6 +57,7 @@ public class HotelService {
 		Hotel hotel = new Hotel();
 		hotel.setId(payload.getId());
 		hotel.setNome(payload.getNome());
+		hotel.setCitta(payload.getCitta());
 		hotel.setIndirizzo(payload.getIndirizzo());
 		hotel.setDescrizione(payload.getDescrizione());
 		hotel.setStelle(payload.getStelle());

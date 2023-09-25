@@ -53,6 +53,9 @@ public class Utente implements UserDetails {
 	private String telefono;
 
 	@Column(nullable = true)
+	private String citta;
+
+	@Column(nullable = true)
 	private String indirizzo;
 
 	@Enumerated(EnumType.STRING)
