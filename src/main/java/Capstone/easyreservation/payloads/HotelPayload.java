@@ -9,6 +9,7 @@ public class HotelPayload {
 	private Long id;
 	private String nome;
 	private String citta;
+	private String cap;
 	private String indirizzo;
 	private String descrizione;
 	private Integer stelle;
