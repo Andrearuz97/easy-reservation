@@ -9,70 +9,28 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
 @Entity
 public class Room {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	private String numeroStanza;
+
 	@Enumerated(EnumType.STRING)
 	private TipoStanza tipo;
-	private Double prezzo;
-	private String imageUrl;
 
+	private Double prezzo;
+
+	private String imageUrl;
 
 	@ManyToOne
 	@JoinColumn(name = "hotel_id")
 	private Hotel hotel;
-
-
-	public String getImageUrl() {
-		return imageUrl;
-	}
-
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
-	}
-
-	public Hotel getHotel() {
-		return hotel;
-	}
-
-	public void setHotel(Hotel hotel) {
-		this.hotel = hotel;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getNumeroStanza() {
-		return numeroStanza;
-	}
-
-	public void setNumeroStanza(String numeroStanza) {
-		this.numeroStanza = numeroStanza;
-	}
-
-	public TipoStanza getTipo() {
-		return tipo;
-	}
-
-	public void setTipo(TipoStanza tipo) {
-		this.tipo = tipo;
-	}
-
-	public Double getPrezzo() {
-		return prezzo;
-	}
-
-	public void setPrezzo(Double prezzo) {
-		this.prezzo = prezzo;
-	}
-
 }

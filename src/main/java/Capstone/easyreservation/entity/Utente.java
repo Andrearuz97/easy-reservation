@@ -1,5 +1,6 @@
 package Capstone.easyreservation.entity;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Entity
 @Table(name = "utenti")
@@ -57,6 +59,12 @@ public class Utente implements UserDetails {
 
 	@Column(nullable = true)
 	private String indirizzo;
+
+	@Column(nullable = true)
+	private String cap;
+
+	@Column(nullable = true)
+	private LocalDate dataDiNascita;
 
 	@Enumerated(EnumType.STRING)
 	private UserRole role;

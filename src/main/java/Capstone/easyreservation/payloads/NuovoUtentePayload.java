@@ -1,5 +1,6 @@
 package Capstone.easyreservation.payloads;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import Capstone.easyreservation.enums.UserRole;
@@ -18,7 +19,9 @@ public class NuovoUtentePayload {
 	private String password;
 	private String telefono;
 	private String citta;
+	private String cap;
 	private String indirizzo;
+	private LocalDate dataDiNascita;
 	private UserRole role;
 
 }

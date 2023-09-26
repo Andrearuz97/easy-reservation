@@ -58,8 +58,9 @@ public class UtenteController {
 
 	private NuovoUtentePayload convertToPayload(Utente user) {
 		return new NuovoUtentePayload(user.getIdUser(), user.getName(), user.getSurname(), user.getEmail(),
-				user.getPassword(), user.getTelefono(), user.getCitta(), user.getIndirizzo(), user.getRole()
-		);
+				user.getPassword(), user.getTelefono(), user.getCitta(), user.getCap(), user.getIndirizzo(),
+				user.getDataDiNascita(), user.getRole());
+
 	}
 
 
