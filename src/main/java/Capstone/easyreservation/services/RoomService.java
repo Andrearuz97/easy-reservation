@@ -7,15 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import Capstone.easyreservation.entity.Room;
-import Capstone.easyreservation.repository.HotelRepository;
 import Capstone.easyreservation.repository.RoomRepository;
 
 @Service
 public class RoomService {
 	@Autowired
 	private RoomRepository stanzaRepository;
-	@Autowired
-	private HotelRepository hotelRepository;
+
 
 	public List<Room> getAllRoomsByHotel(Long hotelId) {
 		return stanzaRepository.findByHotel_Id(hotelId);
