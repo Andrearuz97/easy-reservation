@@ -1,6 +1,6 @@
 package Capstone.easyreservation.services;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,25 +20,33 @@ public class ReservationService {
 	@Autowired
 	private RoomService roomService;
 
-	// Metodo per verificare la disponibilità di una stanza.
-	public boolean isRoomAvailable(Room stanza, Date startDate, Date endDate) {
-		// Qui andiamo a controllare se esistono prenotazioni per la stessa stanza nelle
-		// date specificate
-		List<Reservation> existingReservations = prenotazioneRepository
-				.findByStanzaAndDataCheckInLessThanEqualAndDataCheckOutGreaterThanEqual(stanza, endDate, startDate);
+	public boolean isRoomAvailable(Room stanza, LocalDate startDate, LocalDate endDate) {
+		return isRoomAvailable(stanza, startDate, endDate, null);
+	}
+
+	public boolean isRoomAvailable(Room stanza, LocalDate startDate, LocalDate endDate, Long currentReservationId) {
+		List<Reservation> existingReservations;
+
+		if (currentReservationId != null) {
+			existingReservations = prenotazioneRepository
+					.findByStanzaAndDataCheckInLessThanEqualAndDataCheckOutGreaterThanEqualAndIdNot(stanza, endDate,
+							startDate, currentReservationId);
+		} else {
+			existingReservations = prenotazioneRepository
+					.findByStanzaAndDataCheckInLessThanEqualAndDataCheckOutGreaterThanEqual(stanza, endDate, startDate);
+		}
+
 		return existingReservations.isEmpty();
 	}
 
-	// Metodo per salvare una prenotazione.
 	public Reservation saveReservation(Reservation reservation) {
-		// Carica i dettagli della stanza
 		Room room = roomService.getRoomById(reservation.getStanza().getId())
 				.orElseThrow(() -> new RuntimeException("Stanza non trovata"));
 		reservation.setStanza(room);
 
 		return prenotazioneRepository.save(reservation);
 	}
-	// Metodo per ottenere tutte le prenotazioni.
+
 	public List<Reservation> getAllReservations() {
 		return prenotazioneRepository.findAll();
 	}
@@ -47,13 +55,10 @@ public class ReservationService {
 		return prenotazioneRepository.findByUtenteIdUser(userId);
 	}
 
-
-	// Metodo per ottenere una prenotazione specifica tramite ID.
 	public Optional<Reservation> getReservationById(Long id) {
 		return prenotazioneRepository.findById(id);
 	}
 
-	// Metodo per aggiornare una prenotazione.
 	public Optional<Reservation> updateReservation(Long id, Reservation reservationDetails) {
 		if (prenotazioneRepository.existsById(id)) {
 			reservationDetails.setId(id);
@@ -62,7 +67,6 @@ public class ReservationService {
 		return Optional.empty();
 	}
 
-	// Metodo per eliminare una prenotazione.
 	public boolean deleteReservation(Long id) {
 		if (prenotazioneRepository.existsById(id)) {
 			prenotazioneRepository.deleteById(id);

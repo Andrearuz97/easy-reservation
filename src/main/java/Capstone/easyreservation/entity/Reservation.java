@@ -1,6 +1,6 @@
 package Capstone.easyreservation.entity;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +20,8 @@ public class Reservation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Date dataCheckIn;
-	private Date dataCheckOut;
+	private LocalDate dataCheckIn;
+	private LocalDate dataCheckOut;
 
 	@ManyToOne
 	@JoinColumn(name = "utente_id")

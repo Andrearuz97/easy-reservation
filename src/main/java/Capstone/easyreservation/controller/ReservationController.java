@@ -1,7 +1,6 @@
 package Capstone.easyreservation.controller;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,26 +58,25 @@ public class ReservationController {
 		return prenotazioneService.getReservationsByUserId(userId);
 	}
 
-
-
 	@PutMapping("/{id}")
 	public ResponseEntity<Reservation> updateReservation(@PathVariable Long id,
 			@RequestBody ReservationPayload reservationPayload) {
 
-		// Controlli sulla validità delle date
+		// Controlla se le date di check-in o check-out sono mancanti
+		if (reservationPayload.getDataCheckIn() == null || reservationPayload.getDataCheckOut() == null) {
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		}
+
 		LocalDate today = LocalDate.now();
-		LocalDate checkInDate = reservationPayload.getDataCheckIn().toInstant().atZone(ZoneId.systemDefault())
-				.toLocalDate();
-		LocalDate checkOutDate = reservationPayload.getDataCheckOut().toInstant().atZone(ZoneId.systemDefault())
-				.toLocalDate();
+		LocalDate checkInDate = reservationPayload.getDataCheckIn();
+		LocalDate checkOutDate = reservationPayload.getDataCheckOut();
 
 		if (checkInDate.isBefore(today)) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST); // Data di check-in antecedente alla data odierna
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 
 		if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST); // Data di check-out non valida rispetto al
-																		// check-in
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 		}
 
 		if (id == null) {
@@ -91,8 +89,6 @@ public class ReservationController {
 		}
 
 		Reservation reservation = existingReservation.get();
-
-		// Verifica autenticazione utente
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		Optional<Utente> currentUser = utenteRepository.findByEmail(email);
@@ -102,9 +98,6 @@ public class ReservationController {
 		}
 
 		Utente utente = currentUser.get();
-
-		// Controllo se l'utente corrente ha il ruolo di admin o se è lo stesso utente
-		// della prenotazione
 		if (!utente.equals(reservation.getUtente()) && !utente.getRole().equals(UserRole.ADMIN)) {
 			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
 		}
@@ -122,7 +115,7 @@ public class ReservationController {
 		}
 
 		if (!prenotazioneService.isRoomAvailable(room.get(), reservation.getDataCheckIn(),
-				reservation.getDataCheckOut())) {
+				reservation.getDataCheckOut(), id)) {
 			return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 		}
 
@@ -130,9 +123,6 @@ public class ReservationController {
 		Reservation updatedReservation = prenotazioneService.saveReservation(reservation);
 		return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
 	}
-
-
-
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
@@ -144,22 +134,24 @@ public class ReservationController {
 	}
 
 	@PostMapping("/prenota")
-	public ResponseEntity<Reservation> prenotaStanza(@RequestBody ReservationPayload reservationPayload) {
-		LocalDate today = LocalDate.now(); // ottieni la data odierna
-		LocalDate checkInDate = reservationPayload.getDataCheckIn().toInstant().atZone(ZoneId.systemDefault())
-				.toLocalDate();
-		LocalDate checkOutDate = reservationPayload.getDataCheckOut().toInstant().atZone(ZoneId.systemDefault())
-				.toLocalDate();
+	public ResponseEntity<?> prenotaStanza(@RequestBody ReservationPayload reservationPayload) {
 
-		// Controllo se la data di check-in è antecedente alla data odierna
-		if (checkInDate.isBefore(today)) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+		// Verifica se le date sono presenti nel payload
+		if (reservationPayload.getDataCheckIn() == null || reservationPayload.getDataCheckOut() == null) {
+			return new ResponseEntity<>("Le date di check-in o check-out sono mancanti", HttpStatus.BAD_REQUEST);
 		}
 
-		// Controllo se la data di check-out è antecedente o uguale alla data di
-		// check-in
+		LocalDate today = LocalDate.now();
+		LocalDate checkInDate = reservationPayload.getDataCheckIn();
+
+		LocalDate checkOutDate = reservationPayload.getDataCheckOut();
+
+		// Controllo sulla validità delle date
+		if (checkInDate.isBefore(today)) {
+			return new ResponseEntity<>("Data di check-in antecedente alla data odierna", HttpStatus.BAD_REQUEST);
+		}
 		if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
-			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("Data di check-out non valida rispetto al check-in", HttpStatus.BAD_REQUEST);
 		}
 
 		// Recupera informazioni sull'utente corrente
@@ -167,13 +159,16 @@ public class ReservationController {
 		String email = auth.getName();
 		Optional<Utente> currentUser = utenteRepository.findByEmail(email);
 		if (currentUser.isEmpty()) {
-			return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+			return new ResponseEntity<>("Utente non autorizzato", HttpStatus.FORBIDDEN);
 		}
 
 		Utente utente;
 		if (currentUser.get().getRole().equals(UserRole.ADMIN) && reservationPayload.getUtenteId() != null) {
-			utente = utenteRepository.findById(reservationPayload.getUtenteId())
-					.orElseThrow(() -> new RuntimeException("Utente non trovato"));
+			Optional<Utente> designatedUser = utenteRepository.findById(reservationPayload.getUtenteId());
+			if (designatedUser.isEmpty()) {
+				return new ResponseEntity<>("Utente specificato non trovato", HttpStatus.NOT_FOUND);
+			}
+			utente = designatedUser.get();
 		} else {
 			utente = currentUser.get();
 		}
@@ -184,19 +179,22 @@ public class ReservationController {
 		reservation.setDataCheckOut(reservationPayload.getDataCheckOut());
 		reservation.setUtente(utente);
 
-		// Recupero informazioni sulla stanza
-		Room stanza = roomService.getRoomById(reservationPayload.getStanzaId())
-				.orElseThrow(() -> new RuntimeException("Stanza non trovata"));
-		reservation.setStanza(stanza);
-
-		// Verifica disponibilità stanza
-		if (prenotazioneService.isRoomAvailable(stanza, reservation.getDataCheckIn(), reservation.getDataCheckOut())) {
-			Reservation savedReservation = prenotazioneService.saveReservation(reservation);
-			return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+		if (reservationPayload.getStanzaId() == null) {
+			return new ResponseEntity<>("ID della stanza mancante", HttpStatus.BAD_REQUEST);
 		}
+
+		Optional<Room> room = roomService.getRoomById(reservationPayload.getStanzaId());
+		if (room.isEmpty()) {
+			return new ResponseEntity<>("Stanza non trovata", HttpStatus.NOT_FOUND);
+		}
+
+		if (!prenotazioneService.isRoomAvailable(room.get(), reservation.getDataCheckIn(),
+				reservation.getDataCheckOut())) {
+			return new ResponseEntity<>("La stanza non è disponibile per le date selezionate", HttpStatus.CONFLICT);
+		}
+
+		reservation.setStanza(room.get());
+		Reservation savedReservation = prenotazioneService.saveReservation(reservation);
+		return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
 	}
-
-
 }
