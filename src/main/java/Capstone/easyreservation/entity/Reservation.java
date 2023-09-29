@@ -22,6 +22,7 @@ public class Reservation {
 	private Long id;
 	private LocalDate dataCheckIn;
 	private LocalDate dataCheckOut;
+	private Double totalPrice;
 
 	@ManyToOne
 	@JoinColumn(name = "utente_id")

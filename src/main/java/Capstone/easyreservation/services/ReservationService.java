@@ -1,6 +1,7 @@
 package Capstone.easyreservation.services;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,11 @@ public class ReservationService {
 	private ReservationRepository prenotazioneRepository;
 	@Autowired
 	private RoomService roomService;
+
+	public Double calculateTotalPrice(Room stanza, LocalDate checkIn, LocalDate checkOut) {
+		long daysBetween = ChronoUnit.DAYS.between(checkIn, checkOut);
+		return daysBetween * stanza.getPrezzo();
+	}
 
 	public boolean isRoomAvailable(Room stanza, LocalDate startDate, LocalDate endDate) {
 		return isRoomAvailable(stanza, startDate, endDate, null);

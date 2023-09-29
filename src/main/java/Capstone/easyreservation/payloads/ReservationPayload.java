@@ -11,4 +11,5 @@ public class ReservationPayload {
 	private LocalDate dataCheckOut;
 	private UUID utenteId;
 	private Long stanzaId;
+	private Double totalPrice;
 }

@@ -119,6 +119,10 @@ public class ReservationController {
 			return new ResponseEntity<>(null, HttpStatus.CONFLICT);
 		}
 
+		double totalPrice = prenotazioneService.calculateTotalPrice(room.get(), reservation.getDataCheckIn(),
+				reservation.getDataCheckOut());
+		reservation.setTotalPrice(totalPrice);
+
 		reservation.setStanza(room.get());
 		Reservation updatedReservation = prenotazioneService.saveReservation(reservation);
 		return new ResponseEntity<>(updatedReservation, HttpStatus.OK);
@@ -143,13 +147,13 @@ public class ReservationController {
 
 		LocalDate today = LocalDate.now();
 		LocalDate checkInDate = reservationPayload.getDataCheckIn();
-
 		LocalDate checkOutDate = reservationPayload.getDataCheckOut();
 
 		// Controllo sulla validità delle date
 		if (checkInDate.isBefore(today)) {
 			return new ResponseEntity<>("Data di check-in antecedente alla data odierna", HttpStatus.BAD_REQUEST);
 		}
+
 		if (checkOutDate.isBefore(checkInDate) || checkOutDate.isEqual(checkInDate)) {
 			return new ResponseEntity<>("Data di check-out non valida rispetto al check-in", HttpStatus.BAD_REQUEST);
 		}
@@ -193,8 +197,13 @@ public class ReservationController {
 			return new ResponseEntity<>("La stanza non è disponibile per le date selezionate", HttpStatus.CONFLICT);
 		}
 
+		double totalPrice = prenotazioneService.calculateTotalPrice(room.get(), reservation.getDataCheckIn(),
+				reservation.getDataCheckOut());
+		reservation.setTotalPrice(totalPrice);
+
 		reservation.setStanza(room.get());
 		Reservation savedReservation = prenotazioneService.saveReservation(reservation);
 		return new ResponseEntity<>(savedReservation, HttpStatus.CREATED);
 	}
 }
+
