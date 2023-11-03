@@ -61,6 +61,14 @@ public class HotelController {
 	    }
 	}
 
+	@GetMapping("/autocomplete")
+	public ResponseEntity<List<HotelPayload>> autocompleteHotels(@RequestParam String query) {
+		if (query.length() < 3) {
+			return ResponseEntity.badRequest().build();
+		}
+		List<HotelPayload> hotels = hotelService.autocompleteHotelSearch(query);
+		return ResponseEntity.ok(hotels);
+	}
 
 
 

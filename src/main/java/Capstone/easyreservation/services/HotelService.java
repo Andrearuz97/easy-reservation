@@ -49,6 +49,11 @@ public class HotelService {
 		return hotels.stream().map(this::convertToPayload).collect(Collectors.toList());
 	}
 
+	public List<HotelPayload> autocompleteHotelSearch(String query) {
+		return hotelRepository.findTop10ByNomeContainingIgnoreCaseOrCittaContainingIgnoreCase(query, query).stream()
+				.map(this::convertToPayload).collect(Collectors.toList());
+	}
+
 
 	public HotelPayload saveHotel(HotelPayload hotelPayload) {
 		Hotel hotel = convertToEntity(hotelPayload);
