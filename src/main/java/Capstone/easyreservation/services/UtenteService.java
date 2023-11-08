@@ -5,6 +5,8 @@ import java.time.Period;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,23 +17,23 @@ import Capstone.easyreservation.exception.NotFoundException;
 import Capstone.easyreservation.payloads.NuovoUtentePayload;
 import Capstone.easyreservation.repository.UtenteRepository;
 
-
-
 @Service
 public class UtenteService {
 
+	private static final Logger logger = LoggerFactory.getLogger(UtenteService.class);
+
 	@Autowired
-	UtenteRepository ur;
-
-
+	private UtenteRepository ur;
 
 	// --------------------------------------------------------user save
-
 	public Utente saveUser(NuovoUtentePayload body) {
-
-		ur.findByEmail(body.getEmail()).ifPresent(User -> {
-			throw new BadRequestException("Email " + body.getEmail() + " è già stata utilizzata");
+		ur.findByEmail(body.getEmail()).ifPresent(user -> {
+			String errorMessage = String.format("La registrazione non è riuscita: l'email '%s' è già in uso.",
+					body.getEmail());
+			logger.error(errorMessage);
+			throw new BadRequestException(errorMessage);
 		});
+
 		// Calcola l'età dell'utente
 		LocalDate oggi = LocalDate.now();
 		Period periodo = Period.between(body.getDataDiNascita(), oggi);
@@ -39,35 +41,52 @@ public class UtenteService {
 
 		// Verifica se l'utente è maggiorenne
 		if (eta < 18) {
-			throw new BadRequestException("Devi essere maggiorenne per registrarti.");
+			String errorMessage = "La registrazione non è riuscita: devi essere maggiorenne per registrarti.";
+			logger.error(errorMessage);
+			throw new BadRequestException(errorMessage);
 		}
 
+		// Creazione del nuovo utente
 		Utente newUser = Utente.builder().name(body.getName()).surname(body.getSurname()).email(body.getEmail())
 				.password(body.getPassword()).role(UserRole.USER).telefono(body.getTelefono()).citta(body.getCitta())
 				.indirizzo(body.getIndirizzo()).cap(body.getCap()).dataDiNascita(body.getDataDiNascita()).build();
 
-		return ur.save(newUser);
+		Utente savedUser = ur.save(newUser);
+		logger.info("Nuovo utente registrato con ID: {}", savedUser.getIdUser());
+		return savedUser;
 	}
-
 
 	// --------------------------------------------------------get all users
 	public List<Utente> getUsers() {
-		return ur.findAll();
+		List<Utente> users = ur.findAll();
+		if (users.isEmpty()) {
+			logger.error("Nessun utente trovato nel database.");
+			throw new NotFoundException("Nessun utente è stato trovato.");
+		}
+		logger.info("Trovati tutti gli utenti, totale: {}", users.size());
+		return users;
 	}
 
 	// --------------------------------------------------------get user by id
 	public Utente findById(UUID idUser) {
-		return ur.findById(idUser).orElseThrow(() -> new NotFoundException(idUser));
+		return ur.findById(idUser).orElseThrow(() -> {
+			String errorMessage = String.format("Utente con ID '%s' non trovato.", idUser);
+			logger.error(errorMessage);
+			return new NotFoundException(errorMessage);
+		});
 	}
 
 	// --------------------------------------------------------get user by email
 	public Utente findByEmail(String email) {
-		return ur.findByEmail(email).orElseThrow(() -> new NotFoundException(email));
+		return ur.findByEmail(email).orElseThrow(() -> {
+			String errorMessage = String.format("Utente con email '%s' non trovato.", email);
+			logger.error(errorMessage);
+			return new NotFoundException(errorMessage);
+		});
 	}
 
 	// --------------------------------------------------------modify user by id
-	public Utente findByIdAndUpdate(UUID id, NuovoUtentePayload body) throws NotFoundException {
-
+	public Utente findByIdAndUpdate(UUID id, NuovoUtentePayload body) {
 		Utente foundUser = this.findById(id);
 
 		foundUser.setName(body.getName());
@@ -79,15 +98,15 @@ public class UtenteService {
 		foundUser.setCap(body.getCap());
 		foundUser.setDataDiNascita(body.getDataDiNascita());
 
-
-		return ur.save(foundUser);
+		Utente updatedUser = ur.save(foundUser);
+		logger.info("Utente con ID: {} è stato aggiornato", id);
+		return updatedUser;
 	}
-
 
 	// --------------------------------------------------------delete user by id
-	public void findByIdAndDelete(UUID id) throws NotFoundException {
+	public void findByIdAndDelete(UUID id) {
 		Utente found = this.findById(id);
 		ur.delete(found);
+		logger.info("Utente con ID: {} è stato eliminato", id);
 	}
-
 }

@@ -2,7 +2,10 @@ package Capstone.easyreservation.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import Capstone.easyreservation.entity.Hotel;
 import Capstone.easyreservation.entity.Room;
+import Capstone.easyreservation.exception.NotFoundException;
 import Capstone.easyreservation.payloads.RoomPayload;
 import Capstone.easyreservation.repository.HotelRepository;
 import Capstone.easyreservation.services.RoomService;
@@ -22,35 +26,30 @@ import Capstone.easyreservation.services.RoomService;
 @RequestMapping("/stanze")
 public class RoomController {
 
+	private static final Logger logger = LoggerFactory.getLogger(RoomController.class);
+
     @Autowired
-    private RoomService stanzaService;
+	private RoomService roomService;
 
     @Autowired
     private HotelRepository hotelRepository;
 
-    // Ottieni tutte le stanze di un hotel
     @GetMapping("/hotel/{hotelId}")
     public List<Room> getAllRoomsByHotel(@PathVariable Long hotelId) {
-        return stanzaService.getAllRoomsByHotel(hotelId);
+		logger.info("Fetching all rooms for hotel with ID: {}", hotelId);
+		return roomService.getAllRoomsByHotel(hotelId);
     }
 
-    // Ottieni una stanza specifica di un hotel
     @GetMapping("/hotel/{hotelId}/{roomId}")
     public Room getRoomById(@PathVariable Long hotelId, @PathVariable Long roomId) {
-        Room room = stanzaService.getRoomById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-
-        // Controllo se la stanza appartiene all'hotel specificato
-        if (!room.getHotel().getId().equals(hotelId)) {
-            throw new RuntimeException("Mismatched hotel and room ID");
-        }
-
-        return room;
+		logger.info("Fetching room with ID: {} for hotel ID: {}", roomId, hotelId);
+		return roomService.getRoomById(roomId);
     }
 
-    // Crea una stanza per un hotel
     @PostMapping("/hotel/{hotelId}")
     public Room createRoom(@PathVariable Long hotelId, @RequestBody RoomPayload roomPayload) {
-        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new RuntimeException("Hotel not found"));
+		Hotel hotel = hotelRepository.findById(hotelId)
+				.orElseThrow(() -> new NotFoundException("Hotel with ID " + hotelId + " not found"));
 
         Room room = new Room();
         room.setNumeroStanza(roomPayload.getNumeroStanza());
@@ -59,37 +58,29 @@ public class RoomController {
         room.setHotel(hotel);
 		room.setImageUrl(roomPayload.getImageUrl());
 
-        return stanzaService.saveRoom(room);
+		Room savedRoom = roomService.saveRoom(room);
+		logger.info("Room created with ID: {}", savedRoom.getId());
+		return savedRoom;
     }
 
-    // Aggiorna una stanza specifica di un hotel
     @PutMapping("/hotel/{hotelId}/{roomId}")
     public Room updateRoom(@PathVariable Long hotelId, @PathVariable Long roomId, @RequestBody RoomPayload roomPayload) {
-        Room existingRoom = stanzaService.getRoomById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-
-        // Controllo se la stanza appartiene all'hotel specificato
-        if (!existingRoom.getHotel().getId().equals(hotelId)) {
-            throw new RuntimeException("Mismatched hotel and room ID");
-        }
+		Room existingRoom = roomService.getRoomById(roomId);
 
         existingRoom.setNumeroStanza(roomPayload.getNumeroStanza());
         existingRoom.setTipo(roomPayload.getTipo());
         existingRoom.setPrezzo(roomPayload.getPrezzo());
 		existingRoom.setImageUrl(roomPayload.getImageUrl());
 
-        return stanzaService.saveRoom(existingRoom);
+		Room updatedRoom = roomService.saveRoom(existingRoom);
+		logger.info("Room with ID: {} updated", roomId);
+		return updatedRoom;
     }
 
-    // Elimina una stanza specifica di un hotel
     @DeleteMapping("/hotel/{hotelId}/{roomId}")
-    public void deleteRoom(@PathVariable Long hotelId, @PathVariable Long roomId) {
-        Room existingRoom = stanzaService.getRoomById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
-
-        // Controllo se la stanza appartiene all'hotel specificato
-        if (!existingRoom.getHotel().getId().equals(hotelId)) {
-            throw new RuntimeException("Mismatched hotel and room ID");
-        }
-
-        stanzaService.deleteRoom(roomId);
+	public ResponseEntity<String> deleteRoom(@PathVariable Long hotelId, @PathVariable Long roomId) {
+		logger.info("Deleting room with ID: {} for hotel ID: {}", roomId, hotelId);
+		roomService.deleteRoom(roomId);
+		return ResponseEntity.ok("Room deleted successfully");
     }
 }

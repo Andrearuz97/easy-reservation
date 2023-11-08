@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,8 @@ import Capstone.easyreservation.repository.ReservationRepository;
 
 @Service
 public class ReservationService {
+
+	private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
 
 	@Autowired
 	private ReservationRepository prenotazioneRepository;
@@ -46,12 +50,15 @@ public class ReservationService {
 	}
 
 	public Reservation saveReservation(Reservation reservation) {
-		Room room = roomService.getRoomById(reservation.getStanza().getId())
-				.orElseThrow(() -> new RuntimeException("Stanza non trovata"));
+		Room room = roomService.getRoomById(reservation.getStanza().getId());
 		reservation.setStanza(room);
 
-		return prenotazioneRepository.save(reservation);
+		Reservation savedReservation = prenotazioneRepository.save(reservation);
+		log.info("Reservation saved with id: {}", savedReservation.getId());
+		return savedReservation;
 	}
+
+
 
 	public List<Reservation> getAllReservations() {
 		return prenotazioneRepository.findAll();
@@ -68,16 +75,25 @@ public class ReservationService {
 	public Optional<Reservation> updateReservation(Long id, Reservation reservationDetails) {
 		if (prenotazioneRepository.existsById(id)) {
 			reservationDetails.setId(id);
-			return Optional.of(prenotazioneRepository.save(reservationDetails));
+			Reservation updatedReservation = prenotazioneRepository.save(reservationDetails);
+			log.info("Reservation updated with id: {}", id);
+			return Optional.of(updatedReservation);
+		} else {
+			log.warn("Attempted to update a reservation that does not exist with id: {}", id);
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 
 	public boolean deleteReservation(Long id) {
 		if (prenotazioneRepository.existsById(id)) {
 			prenotazioneRepository.deleteById(id);
+			log.info("Reservation deleted with id: {}", id);
 			return true;
+		} else {
+			log.warn("Attempted to delete a reservation that does not exist with id: {}", id);
+			return false;
 		}
-		return false;
 	}
-}
+
+	}
+

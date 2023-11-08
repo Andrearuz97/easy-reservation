@@ -1,36 +1,37 @@
 package Capstone.easyreservation.services;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import Capstone.easyreservation.entity.Room;
+import Capstone.easyreservation.exception.NotFoundException;
 import Capstone.easyreservation.repository.RoomRepository;
 
 @Service
 public class RoomService {
-	@Autowired
-	private RoomRepository stanzaRepository;
 
+	@Autowired
+	private RoomRepository roomRepository;
 
 	public List<Room> getAllRoomsByHotel(Long hotelId) {
-		return stanzaRepository.findByHotel_Id(hotelId);
-
+		return roomRepository.findByHotel_Id(hotelId);
 	}
 
-	// Ottieni una stanza specifica
-	public Optional<Room> getRoomById(Long id) {
-		return stanzaRepository.findById(id);
+	public Room getRoomById(Long id) {
+		return roomRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Room with ID " + id + " not found"));
 	}
 
 	public Room saveRoom(Room room) {
-		return stanzaRepository.save(room);
+		return roomRepository.save(room);
 	}
 
-	// Elimina una stanza
 	public void deleteRoom(Long id) {
-		stanzaRepository.deleteById(id);
+		if (!roomRepository.existsById(id)) {
+			throw new NotFoundException("Room with ID " + id + " not found");
+		}
+		roomRepository.deleteById(id);
 	}
 }

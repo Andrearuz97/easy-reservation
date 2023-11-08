@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import Capstone.easyreservation.entity.Hotel;
+import Capstone.easyreservation.exception.NotFoundException;
 import Capstone.easyreservation.payloads.HotelPayload;
 import Capstone.easyreservation.repository.HotelRepository;
 @Service
@@ -25,9 +26,11 @@ public class HotelService {
 	}
 
 	public HotelPayload getHotelById(Long id) {
-		Hotel hotel = hotelRepository.findById(id).orElse(null);
+		Hotel hotel = hotelRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Hotel with ID " + id + " not found"));
 		return convertToPayload(hotel);
 	}
+
 
 	 public Page<HotelPayload> getAllHotels(int page, int size) {
 	        Pageable pageable = PageRequest.of(page, size);
